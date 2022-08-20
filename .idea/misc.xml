@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Users/hp/SummerTraining/UniversityProject/app/src/main/res/drawable/add_image.xml" value="0.1" />
+        <entry key="..\:/Users/hp/SummerTraining/UniversityProject/app/src/main/res/drawable/add_location.xml" value="0.2285" />
+        <entry key="..\:/Users/hp/SummerTraining/UniversityProject/app/src/main/res/drawable/circle.xml" value="0.2285" />
+        <entry key="..\:/Users/hp/SummerTraining/UniversityProject/app/src/main/res/drawable/ic_baseline_add_circle_24.xml" value="0.2285" />
+        <entry key="..\:/Users/hp/SummerTraining/UniversityProject/app/src/main/res/drawable/ic_baseline_list_alt_24.xml" value="0.2285" />
+        <entry key="..\:/Users/hp/SummerTraining/UniversityProject/app/src/main/res/drawable/ic_baseline_person_24.xml" value="0.2285" />
+        <entry key="..\:/Users/hp/SummerTraining/UniversityProject/app/src/main/res/drawable/ic_baseline_post_add_24.xml" value="0.2285" />
+        <entry key="..\:/Users/hp/SummerTraining/UniversityProject/app/src/main/res/drawable/img.xml" value="0.2285" />
+        <entry key="..\:/Users/hp/SummerTraining/UniversityProject/app/src/main/res/layout/activity_add_found.xml" value="0.2234375" />
+        <entry key="..\:/Users/hp/SummerTraining/UniversityProject/app/src/main/res/layout/activity_create_account.xml" value="0.152" />
+        <entry key="..\:/Users/hp/SummerTraining/UniversityProject/app/src/main/res/layout/activity_item_list.xml" value="0.2234375" />
+        <entry key="..\:/Users/hp/SummerTraining/UniversityProject/app/src/main/res/layout/activity_login.xml" value="0.264" />
+        <entry key="..\:/Users/hp/SummerTraining/UniversityProject/app/src/main/res/layout/activity_main.xml" value="0.2234375" />
+        <entry key="..\:/Users/hp/SummerTraining/UniversityProject/app/src/main/res/layout/activity_maps.xml" value="0.2234375" />
+        <entry key="..\:/Users/hp/SummerTraining/UniversityProject/app/src/main/res/layout/activity_test.xml" value="0.2234375" />
+        <entry key="..\:/Users/hp/SummerTraining/UniversityProject/app/src/main/res/layout/fragment_add_found_item.xml" value="0.264" />
+        <entry key="..\:/Users/hp/SummerTraining/UniversityProject/app/src/main/res/layout/fragment_item_list.xml" value="0.2234375" />
+        <entry key="..\:/Users/hp/SummerTraining/UniversityProject/app/src/main/res/layout/fragment_maps.xml" value="0.2234375" />
+        <entry key="..\:/Users/hp/SummerTraining/UniversityProject/app/src/main/res/layout/fragment_profile.xml" value="0.264" />
+        <entry key="..\:/Users/hp/SummerTraining/UniversityProject/app/src/main/res/layout/item_card.xml" value="0.264" />
+        <entry key="..\:/Users/hp/SummerTraining/UniversityProject/app/src/main/res/menu/bottom_nav_menu.xml" value="0.2234375" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>
