@@ -1,8 +1,11 @@
 package android.example.universityproject;
 
+import static android.app.Activity.RESULT_OK;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -14,11 +17,25 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Bundle;
+import android.provider.MediaStore;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
+
+
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
@@ -34,6 +51,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
+import java.util.*;
+
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -42,7 +62,10 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -50,6 +73,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -62,6 +86,9 @@ public class AddFoundItemFragment extends Fragment {
     TextView tv_longitude, tv_latitude, tv_area;
     Button btn_submit;
     EditText itemName, itemCategory, contactNo, et_description;
+    private ProgressDialog progressDialog;
+    private Uri resultUri;
+    private FirebaseAuth auth;
     // initializing
     // FusedLocationProviderClient
     // object
@@ -95,6 +122,8 @@ public class AddFoundItemFragment extends Fragment {
         itemCategory = rootView.findViewById(R.id.et_itemCategory);
         contactNo = rootView.findViewById(R.id.et_ContactNo);
         et_description = rootView.findViewById(R.id.et_description);
+        progressDialog = new ProgressDialog(getActivity());
+        auth = FirebaseAuth.getInstance();
 
         add_image.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -102,6 +131,8 @@ public class AddFoundItemFragment extends Fragment {
                 imageChooser();
             }
         });
+
+
 
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
@@ -128,7 +159,7 @@ public class AddFoundItemFragment extends Fragment {
 
 //                databaseReference.child("Hey").setValue("Hello");
                 addItemToDatabase();
-                saveImageToFirebase();
+//                saveImageToFirebase();
 
             }
         });
@@ -138,41 +169,144 @@ public class AddFoundItemFragment extends Fragment {
     }
 
     private void addItemToDatabase() {
+        progressDialog.setMessage("Adding..............");
+        progressDialog.setCanceledOnTouchOutside(false);
+        progressDialog.show();
+
+        String currentUserId = auth.getCurrentUser().getUid();
+        databaseReference = FirebaseDatabase.getInstance().getReference()
+                .child("users").child(currentUserId);
+
+
         // get All data
         String item_name, item_category, contact_no, description, img_url;
-        double longitude, latitude;
+        String longitude, latitude;
         ImageView image;
         item_name = itemName.getText().toString();
         item_category = itemCategory.getText().toString();
         contact_no = contactNo.getText().toString();
-        longitude = Double.parseDouble(tv_longitude.getText().toString());
-        latitude = Double.parseDouble(tv_latitude.getText().toString());
+        longitude = tv_longitude.getText().toString();
+        latitude = tv_latitude.getText().toString();
         description = et_description.getText().toString();
         img_url = "";
 
+        HashMap itemInfo = new HashMap();
+
+        itemInfo.put("id", currentUserId);
+        itemInfo.put("itemName", item_name);
+        itemInfo.put("itemCategory", item_category);
+        itemInfo.put("contactNo", contact_no);
+        itemInfo.put("longitude", longitude);
+        itemInfo.put("latitude", latitude);
+        itemInfo.put("description", description);
+        itemInfo.put("image_url", "no_pic_uploaded");
 
 //        ItemDetails itemDetails = new ItemDetails(item_name, item_category, longitude, latitude, contact_no, description);
-        ItemDetails itemDetails = new ItemDetails();
-        itemDetails.setItem_name(item_name);
-        itemDetails.setItem_category(item_category);
-        itemDetails.setLongitude(longitude);
-        itemDetails.setLatitude(latitude);
-        itemDetails.setContact_no(contact_no);
-        itemDetails.setDescription(description);
-        itemDetails.setImg_url(img_url);
+//        ItemDetails itemDetails = new ItemDetails();
+//        itemDetails.setItem_name(item_name);
+//        itemDetails.setItem_category(item_category);
+//        itemDetails.setLongitude(longitude);
+//        itemDetails.setLatitude(latitude);
+//        itemDetails.setContact_no(contact_no);
+//        itemDetails.setDescription(description);
+//        itemDetails.setImg_url(img_url);
 
 
 //        databaseReference.setValue("Hello !!");
-        databaseReference.push().setValue(itemDetails);
-        Toast.makeText(getActivity(), "Data Inserted Successfully !!", Toast.LENGTH_SHORT).show();
+        databaseReference.updateChildren(itemInfo).addOnCompleteListener(new OnCompleteListener() {
+            @Override
+            public void onComplete(@NonNull Task task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(getActivity(), "Date set Successful", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getActivity(), task.getException().toString(), Toast.LENGTH_SHORT).show();
+                }
+
+                getActivity().finish();
+
+            }
+        });
+        if (resultUri != null) {
+            final StorageReference filePath = FirebaseStorage.getInstance().getReference()
+                    .child("image_url").child(currentUserId);
+
+            Bitmap bitmap = null;
+
+            try {
+                bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), resultUri);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 20, byteArrayOutputStream);
+            byte[] data = byteArrayOutputStream.toByteArray();
+            UploadTask uploadTask = filePath.putBytes(data);
+
+            uploadTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(getActivity(), "Image Upload Failed", Toast.LENGTH_SHORT).show();
+                }
+            });
+            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                    if (taskSnapshot.getMetadata() != null && taskSnapshot.getMetadata().getReference() != null) {
+                        Task<Uri> result = taskSnapshot.getStorage().getDownloadUrl();
+                        result.addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                String imageUrl = uri.toString();
+                                Map newImageMap = new HashMap();
+                                newImageMap.put("image_url", imageUrl);
+
+                                databaseReference.updateChildren(newImageMap).addOnCompleteListener(new OnCompleteListener() {
+                                    @Override
+                                    public void onComplete(@NonNull Task task) {
+                                        if (task.isSuccessful()) {
+                                            Toast.makeText(getActivity(), "Image url added to database successfully", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            Toast.makeText(getActivity(), task.getException().toString(), Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                });
+
+                                getActivity().finish();
+                            }
+                        });
+                    }
+                }
+            });
+
+            getActivity().finish();
+            progressDialog.dismiss();
+
+        }
+
     }
+//}
+//            });
+////        databaseReference.push().setValue(itemDetails);
+////        Toast.makeText(getActivity(), "Data Inserted Successfully !!", Toast.LENGTH_SHORT).show();
+//    }
 
 
     void imageChooser() {
 
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        add_image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_PICK);
+                intent.setType("image/*");
+                startActivityForResult(intent, 1);
 
-         ActivityResultLauncher.launch(intent);
+            }
+        });
+//        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//
+//         ActivityResultLauncher.launch(intent);
     }
 
     // You can do the assignment inside onAttach or onCreate, i.e, before the activity is displayed
@@ -181,7 +315,7 @@ public class AddFoundItemFragment extends Fragment {
             new ActivityResultCallback<ActivityResult>() {
                 @Override
                 public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         Intent intent = result.getData();
                         Bitmap bitmap  = (Bitmap)intent.getExtras().get("data");
 //                        Bundle bundle = result.getData().getExtras();
@@ -367,5 +501,16 @@ public class AddFoundItemFragment extends Fragment {
 //            getLastLocation();
 //        }
 //    }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1 && resultCode == RESULT_OK && data != null) {
+            resultUri = data.getData();
+            add_image.setImageURI(resultUri);
+
+        }
+    }
 
 }
